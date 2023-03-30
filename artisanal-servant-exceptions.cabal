@@ -19,14 +19,17 @@ common warnings
 executable artisanal-servant-exceptions
     import:           warnings
     main-is:          Main.hs
-    -- other-modules:
+    other-modules:
+        StackTrace
     -- other-extensions:
     build-depends:    
         base,
         servant,
         servant-server,
         transformers,
+        mtl,
         warp,
+        unliftio-core
     hs-source-dirs:   app
     default-language: GHC2021
     build-depends:

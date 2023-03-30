@@ -7,6 +7,7 @@ import Servant
 import Data.Functor
 import Network.Wai.Handler.Warp
 import Control.Monad.Trans.Class
+import StackTrace
 
 type M e = ReaderT e IO
 
