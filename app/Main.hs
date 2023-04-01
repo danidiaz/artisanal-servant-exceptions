@@ -10,6 +10,7 @@ import Control.Monad.Trans.Class
 import StackTrace (StackTraceRef)
 import StackTrace qualified 
 import RIO
+import Data.Function ((&))
 
 newtype Foo m = Foo { runFoo :: m () }
 newtype Bar m = Bar { runBar :: m () }
@@ -34,8 +35,8 @@ makeFooServer foo = runFoo foo $> NoContent
 main :: IO ()
 main = do
     let fooServer = makeFooServer foo
-        foo = makeFoo bar
-        bar = makeBar baz
-        baz = makeBaz
+        foo = makeFoo bar & \Foo {runFoo} -> Foo { runFoo = StackTrace.annotate "runFoo" runFoo}
+        bar = makeBar baz & \Bar {runBar} -> Bar { runBar = StackTrace.annotate "runBar" runBar}
+        baz = makeBaz & \Baz {runBaz} -> Baz { runBaz = StackTrace.annotate "runBax" runBaz}
         t action = Servant.Handler $ lift $ StackTrace.with $ runReaderT action
     run 8000 $ serve (Proxy @API) $ hoistServer (Proxy @API) t fooServer
