@@ -36,8 +36,6 @@ makeBaz = Baz { runBaz = liftIO $ throwIO $ userError "some exception"}
 
 type API = PostNoContent
 
-type FooServer = ServerT API (RIO ())
-
 makeFooServer :: Foo (RIO StackTraceRef) -> ServerT API (RIO StackTraceRef)
 makeFooServer foo = runFoo foo $> NoContent
 
