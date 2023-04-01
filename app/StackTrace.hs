@@ -14,6 +14,11 @@ type StackTrace = [Annotation]
 
 type StackTraceRef = IORef StackTrace
 
+-- | Given some 'IO' action which works with an 'StackTraceRef', allocate the
+-- ref and pass it to the action.
+--
+-- Additionally, catch any outgoing synchronous exception and re-throw it as an
+-- 'ExceptionWithStackTrace' enriched with the contents of the 'StackTraceRef'.
 with :: (StackTraceRef -> IO r) -> IO r
 with f = do
   hPutStrLn stderr "Allocating stack trace ref"
@@ -29,6 +34,10 @@ with f = do
         throwIO (ExceptionWithStackTrace stackTrace exception)
     Right r -> pure r
 
+-- | Given an annotation and an action, add the annotation to the stack trace if
+-- we exit the action with an exception.
+--
+-- Clear the stack trace when entering the action and exiting without exception.
 annotate :: Annotation -> RIO StackTraceRef a -> RIO StackTraceRef a
 annotate frame action = do
   ref <- ask

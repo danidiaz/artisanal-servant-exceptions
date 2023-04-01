@@ -13,6 +13,7 @@ import Servant
 import StackTrace (StackTraceRef)
 import StackTrace qualified
 
+-- | Some "components".
 newtype Foo m = Foo {runFoo :: m ()}
 
 newtype Bar m = Bar {runBar :: m ()}
@@ -25,7 +26,8 @@ makeFoo bar = Foo {runFoo = runBar bar}
 makeBar :: Baz m -> Bar m
 makeBar baz = Bar {runBar = runBaz baz}
 
--- | A defect of this approach. 
+-- | A variant of 'makeBar' which exemplifies a defect of this approach to stack
+-- traces. 
 -- 
 -- If we catch an exception coming from an annotated function (here 'runBaz')
 -- and then throw an unrelated exception _without crossing an annotation
@@ -42,6 +44,7 @@ makeBar' baz =
 makeBaz :: Baz (RIO e)
 makeBaz = Baz {runBaz = liftIO $ throwIO $ userError "some exception"}
 
+-- | Not a very complex API! But good enough for this example.
 type API = PostNoContent
 
 makeFooServer :: Foo (RIO StackTraceRef) -> ServerT API (RIO StackTraceRef)
@@ -50,9 +53,11 @@ makeFooServer foo = runFoo foo $> NoContent
 main :: IO ()
 main = do
   let fooServer = makeFooServer foo
+      -- Construct the compoents and add the stack trace annoations
       foo = makeFoo bar & \Foo {runFoo} -> Foo {runFoo = StackTrace.annotate "runFoo" runFoo}
       bar = makeBar baz & \Bar {runBar} -> Bar {runBar = StackTrace.annotate "runBar" runBar}
       -- bar = makeBar' baz & \Bar {runBar} -> Bar {runBar = StackTrace.annotate "runBar" runBar}
       baz = makeBaz & \Baz {runBaz} -> Baz {runBaz = StackTrace.annotate "runBaz" runBaz}
+      -- We allocate an stack trace ref per request, when hoisting the server.
       hoistRequest action = Servant.Handler $ lift $ StackTrace.with $ runReaderT action
   run 8000 $ serve (Proxy @API) $ hoistServer (Proxy @API) hoistRequest fooServer
