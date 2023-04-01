@@ -43,7 +43,7 @@ contents, and re-throw the exception wrapped in an `ExceptionWithStackTrace`.
 
 If we catch an exception coming from an annotated function and then throw an
 unrelated exception _without crossing an annotation frontier_ the old exception
-stays in the stack trace. 
+stays in the stack trace, which might be misleading.
 
 ## Possible alternatives
 
