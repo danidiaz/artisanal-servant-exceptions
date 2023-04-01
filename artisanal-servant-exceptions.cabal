@@ -21,6 +21,7 @@ executable artisanal-servant-exceptions
     main-is:          Main.hs
     other-modules:
         StackTrace
+        RIO
     -- other-extensions:
     build-depends:    
         base,
