@@ -50,7 +50,7 @@ stays in the stack trace, which might be misleading.
 We could store the stack trace directly in the reader environment, without using
 a mutable `IORef`. 
 
-The stack trace would grow (using `local`) as we get into nested function calls.
+The stack trace would grow (using [`local`](https://hackage.haskell.org/package/transformers-0.6.1.0/docs/Control-Monad-Trans-Reader.html#v:local)) as we get into nested function calls.
 Exceptions would be caught and re-thrown as `ExceptionWithStackTrace` at the
 _earliest_ possible moment, without waiting until we exit the Servant handler.
 
